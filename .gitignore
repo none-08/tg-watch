@@ -1,0 +1,10 @@
+# Credentials & live login state — NEVER commit
+.env
+*.session
+*.session-journal
+
+# Python
+__pycache__/
+*.py[cod]
+venv/
+.venv/
