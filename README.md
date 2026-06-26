@@ -86,21 +86,51 @@ RestartSec=10
 WantedBy=multi-user.target
 ```
 
-Enable and start:
+Enable and start (`--now` starts it immediately **and** enables auto-start on reboot):
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable tg-watch
-sudo systemctl start tg-watch
+sudo systemctl enable --now tg-watch
 ```
+
+> Adjust `tg-watch` to your actual service name, and `WorkingDirectory` /
+> `ExecStart` to wherever you cloned the repo.
+
+### First-time login on the server
+
+The session must be created interactively (you have to type the code). Do this
+**once** on the server, then start the service:
+
+```bash
+source venv/bin/activate
+python3 main.py --login     # type the login code + 2FA password
+```
+
+Run the account from **one machine only** — logging in from a second machine
+invalidates the session and forces a new login.
+
+### Updating from GitHub
+
+Pull the latest code and restart the service:
+
+```bash
+cd /root/tg-watch
+git pull
+sudo systemctl restart tg-watch
+```
+
+Your `.env` and `*.session` files are gitignored, so `git pull` never touches
+them. If `git pull` reports a conflict on a tracked file you edited on the
+server, discard the local change with `git reset --hard origin/main` (this only
+overwrites tracked files — credentials and sessions stay).
 
 ### Useful commands
 
 ```bash
 systemctl status tg-watch          # check status
-journalctl -u tg-watch -f          # live logs
+journalctl -u tg-watch -n 50 -f    # live logs (last 50 lines, then follow)
 sudo systemctl restart tg-watch    # restart
-sudo journalctl --vacuum-time=1s   # clear logs
+sudo journalctl --vacuum-time=1s   # clear all logs
 ```
 
 ## Files
