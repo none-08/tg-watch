@@ -1,7 +1,7 @@
 import re
 import sys
 import asyncio
-from telethon import TelegramClient, events
+from telethon import TelegramClient, events, Button
 from config import API_ID, API_HASH, PHONE, BOT_TOKEN, MY_CHAT_ID, SOURCE_GROUPS
 
 WHOLE_WORD_KEYWORDS = ["hos", "mg need", "mg needed", "need mg", "mg avail", "mg kere", "mg bormi", "mg service"]
@@ -35,6 +35,29 @@ async def build_message_link(event):
     return f"https://t.me/c/{chat_id}/{msg_id}"
 
 
+async def build_sender_info(event):
+    """Return a markdown line identifying the sender, with a link that
+    opens a private chat even after the original message is deleted."""
+    sender = await event.get_sender()
+    if sender is None:
+        return "**From user:** unknown"
+
+    name = " ".join(
+        part for part in (getattr(sender, "first_name", None),
+                          getattr(sender, "last_name", None)) if part
+    ) or getattr(sender, "title", None) or "Unknown"
+
+    username = getattr(sender, "username", None)
+    if username:
+        # @username links resolve in any client and survive message deletion.
+        link = f"https://t.me/{username}"
+    else:
+        # No username: tg://user?id= opens the private chat by numeric ID.
+        link = f"tg://user?id={sender.id}"
+
+    return f"**From user:** [{name}]({link})"
+
+
 @user_client.on(events.NewMessage(chats=SOURCE_GROUPS))
 async def handler(event):
     if not event.text:
@@ -46,11 +69,21 @@ async def handler(event):
     chat = await event.get_chat()
     chat_name = getattr(chat, "title", "Unknown")
     link = await build_message_link(event)
+    sender_info = await build_sender_info(event)
 
-    message = f"**From: {chat_name}**\n\n{event.text}\n\n[Go to message]({link})"
+    message = (
+        f"**From: {chat_name}**\n"
+        f"{sender_info}\n\n"
+        f"{event.text}"
+    )
 
     await asyncio.sleep(2)
-    await bot_client.send_message(MY_CHAT_ID, message, link_preview=False)
+    await bot_client.send_message(
+        MY_CHAT_ID,
+        message,
+        link_preview=False,
+        buttons=Button.url("➡️ Go to message", link),
+    )
 
     print(f"Sent message {event.id} from {chat_name}")
 
