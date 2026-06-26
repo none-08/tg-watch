@@ -69,7 +69,7 @@ Add more terms separated by `|`.
 
 ### systemd (Ubuntu)
 
-`/etc/systemd/system/tg-watch.service`:
+`/etc/systemd/system/telephon.service`:
 
 ```ini
 [Unit]
@@ -77,8 +77,8 @@ Description=Telegram Message Forwarder
 After=network.target
 
 [Service]
-WorkingDirectory=/root/tg-watch
-ExecStart=/root/tg-watch/venv/bin/python3 main.py
+WorkingDirectory=/root/telephon
+ExecStart=/root/telephon/venv/bin/python3 main.py
 Restart=always
 RestartSec=10
 
@@ -90,11 +90,12 @@ Enable and start (`--now` starts it immediately **and** enables auto-start on re
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable --now tg-watch
+sudo systemctl enable --now telephon
 ```
 
-> Adjust `tg-watch` to your actual service name, and `WorkingDirectory` /
-> `ExecStart` to wherever you cloned the repo.
+> The service is named `telephon` and the repo lives at `/root/telephon` on the
+> server. If you deploy elsewhere, adjust the service name, `WorkingDirectory`,
+> and `ExecStart` accordingly.
 
 ### First-time login on the server
 
@@ -114,9 +115,9 @@ invalidates the session and forces a new login.
 Pull the latest code and restart the service:
 
 ```bash
-cd /root/tg-watch
+cd /root/telephon
 git pull
-sudo systemctl restart tg-watch
+sudo systemctl restart telephon
 ```
 
 Your `.env` and `*.session` files are gitignored, so `git pull` never touches
@@ -127,9 +128,9 @@ overwrites tracked files — credentials and sessions stay).
 ### Useful commands
 
 ```bash
-systemctl status tg-watch          # check status
-journalctl -u tg-watch -n 50 -f    # live logs (last 50 lines, then follow)
-sudo systemctl restart tg-watch    # restart
+systemctl status telephon          # check status
+journalctl -u telephon -n 50 -f    # live logs (last 50 lines, then follow)
+sudo systemctl restart telephon    # restart
 sudo journalctl --vacuum-time=1s   # clear all logs
 ```
 
