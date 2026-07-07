@@ -22,6 +22,25 @@ user_client = TelegramClient("session", API_ID, API_HASH)
 bot_client = TelegramClient("bot_session", API_ID, API_HASH)
 
 
+async def send_alert(chat_name, sender_info, text, link, event_id):
+    message = (
+        f"**From: {chat_name}**\n"
+        f"{sender_info}\n\n"
+        f"{text}"
+    )
+
+    try:
+        await bot_client.send_message(
+            MY_CHAT_ID,
+            message,
+            link_preview=False,
+            buttons=Button.url("Go to message", link),
+        )
+        print(f"Sent message {event_id} from {chat_name}")
+    except Exception as exc:
+        print(f"Failed to send message {event_id} from {chat_name}: {exc}")
+
+
 async def build_message_link(event):
     chat = await event.get_chat()
     msg_id = event.id
@@ -70,22 +89,7 @@ async def handler(event):
     chat_name = getattr(chat, "title", "Unknown")
     link = await build_message_link(event)
     sender_info = await build_sender_info(event)
-
-    message = (
-        f"**From: {chat_name}**\n"
-        f"{sender_info}\n\n"
-        f"{event.text}"
-    )
-
-    await asyncio.sleep(2)
-    await bot_client.send_message(
-        MY_CHAT_ID,
-        message,
-        link_preview=False,
-        buttons=Button.url("➡️ Go to message", link),
-    )
-
-    print(f"Sent message {event.id} from {chat_name}")
+    asyncio.create_task(send_alert(chat_name, sender_info, event.text, link, event.id))
 
 
 async def main():
