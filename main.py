@@ -5,7 +5,7 @@ from telethon import TelegramClient, events, Button
 from config import API_ID, API_HASH, PHONE, BOT_TOKEN, MY_CHAT_ID, SOURCE_GROUPS
 
 WHOLE_WORD_KEYWORDS = ["hos", "mg need", "mg needed", "need mg", "mg avail", "mg kere", "mg bormi", "mg service"]
-SUBSTRING_KEYWORDS = ["assign", "selfi", "team to solo", "remove", "bobtail", "bbt"]
+SUBSTRING_KEYWORDS = ["assign", "selfi", "team to solo", "mg urib"]
 
 _patterns = []
 for k in WHOLE_WORD_KEYWORDS:
